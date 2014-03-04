@@ -12,8 +12,8 @@ Xenserver Backup -
 
 * Free and open-source software: ASL2 license
 * Blog: http://virantha.com/category/projects/xenserver_backup
-* Documentation: http://virantha.github.com/xenserver_backup/html
-* Source: https://www.github.com/virantha/xenserver_backup
+* Documentation: http://virantha.github.io/xenserver_backup/html
+* Source: https://github.com/virantha/xenserver_backup
 
 Features
 --------
