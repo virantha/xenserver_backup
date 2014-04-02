@@ -109,12 +109,20 @@ class XenBackup(object):
         self.get_options(argv)
         
         self.host = XenHost(self.args['-u'], self.args['<servername>'], self.args['-p'])
-        out = self.host.get_vm_list()
-        print (out)
+        vms = self.host.get_vm_list()
         print(self.config)
-        self.host.prepare_backup(self.config['backup_location']['command'],
+        ready = self.host.before_backup(self.config['backup_location']['precommands'],
                             self.config['backup_location']['dir'],
                             )
+        if ready:
+            backup_vm_list = self.config['backup_vm_names']
+            for vm_obj in self.host.iter_vm(backup_vm_list):
+                vm_obj.backup()
+            ready = self.host.after_backup(self.config['backup_location']['postcommands'])
+
+            
+        else:
+            print("Error trying to find backup location")
 
 
 

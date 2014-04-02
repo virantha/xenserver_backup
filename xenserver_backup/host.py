@@ -16,6 +16,9 @@
 """
 import logging
 from fabric.api import run, env, cd
+from fabric.contrib import files
+
+from vm import XenVM
 
 class XenHost(object):
     def __init__(self, username, hostname, port=22):
@@ -23,8 +26,9 @@ class XenHost(object):
         self.host = hostname
         self.port = port
         env.host_string = '%s@%s:%s' % (self.user, self.host, self.port)
+        self.vms = {}
 
-    def _run(self, cmd):
+    def run(self, cmd):
         out = run(cmd)
         return out
 
@@ -44,18 +48,34 @@ class XenHost(object):
     def get_vm_list(self):
         """ Return a dict of vm-name to uuid
         """
-        text = self._run('xe vm-list')
-        self.vm = self._parse_vm_uuid(text)
-        return self.vm
+        text = self.run('xe vm-list')
+        self.vm_names = self._parse_vm_uuid(text)
+        return self.vm_names
 
-    def prepare_backup(self, cmd, directory):
+    def before_backup(self, cmds, directory):
         """
             Make sure the mount cmd can be executed and the directory is present
         """
-        if cmd != "":
-            self._run(cmd)
-        with cd(directory):
-            self._run('ls')
+        if cmds:
+            for cmd in cmds:
+                self.run(cmd)
+        self.backup_dir = directory
+        return files.exists(directory)
+
+    def after_backup(self, cmds):
+        if cmds:
+            for cmd in cmds:
+                self.run(cmd)
+
+    def iter_vm(self, vm_name_list=[]):
+        if len(vm_name_list)==0:
+            vm_name_list = self.vm_names.keys()
+        for vm_name in vm_name_list:
+            # Make sure this vm name is valid and present
+            assert vm_name in self.vm_names.keys()
+            uuid = self.vm_names[vm_name]
+            yield self.vms.setdefault(uuid, XenVM(self, uuid, vm_name))
+
 
 
 

@@ -1,0 +1,13 @@
+backup_vm_names:
+    - ipfire hvm
+    - Windows 7 DVR2
+    - Linux ubuntu 12.04
+
+backup_location:
+    #command: 'mount.cifs //dvr3/Media /media/wm -o credentials=/root/.smbcredentials,rw,sec=ntlm,noserverino,uid=1000,gid=1000'
+    precommands: 
+    postcommands:
+        - 'umount /dev/sdd1'
+    dir: '/mnt/backup/'
+    
+
